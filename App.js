@@ -78,7 +78,7 @@ export default class App extends React.Component {
         </View>
       )
     }
-    else if (this.state.isStarted && !this.state.advice) {
+    else if (this.state.isStarted && !this.state.advice && !this.state.isFinished) {
       return (
         <View style={styles.container}>
           <Text>{this.state.questions[this.state.questionNo].question}</Text>
@@ -88,18 +88,20 @@ export default class App extends React.Component {
         </View>
       )
     }
-    else if (this.state.advice) {
+    else if (this.state.advice && this.state.questionNo != 16) {
       return (
         <View style={styles.container}>
           <Text>{this.state.questions[this.state.questionNo].advice}</Text>
-          <Button type='outline' color="black" onPress={() => { this.backToQuestions() }} title='Back to questions'></Button>
+            <Button type='outline' color="black" onPress={() => { this.backToQuestions() }} title='Back to questions'></Button> 
         </View>
       )
     }
-    else if (this.state.isFinished) {
+    else if (this.state.isFinished || this.state.questionNo == 16) {
+      return (
       <View style={styles.container}>
           <Text>That is it for today.</Text>
         </View>
+      )
     }
   }
 }
