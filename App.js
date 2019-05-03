@@ -1,10 +1,25 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
+import { CustomButton } from './components/customButton.js';
+import { LongButton } from './components/longButton';
+
+import { Font } from 'expo';
 
 export default class App extends React.Component {
+  componentWillMount() {
+    this._loadAssetsAsync();
+  }
+
+  _loadAssetsAsync = async () => {
+    await Font.loadAsync({
+      Courier: require('./assets/fonts/courier.ttf'),
+    });
+    this.setState({ loaded: true });
+};
   constructor(props) {
     super(props);
     this.state = {
+      loaded: false,
       isStarted: false,
       isFinished: false,
       questions: [
@@ -66,24 +81,30 @@ export default class App extends React.Component {
       }
     }
   }
+ 
   render() {
-
-
-    if (!this.state.isStarted) {
+   if (!this.state.loaded) {
+     return (
+     <View></View>
+      )
+   }
+    if (!this.state.isStarted && this.state.loaded) {
       return (
         <View style={styles.container}>
-          <Text>Everything is awful and I'm not okay</Text>
-          <Text>Questions to ask before giving up</Text>
-          <Button type='outline' color="black" onPress={() => { this.start() }} title='Start'></Button>
+          <Text style={styles.titleText}>Everything is awful and I'm not okay</Text>
+          <Text style={styles.questionText}>Questions to ask before giving up</Text>
+          <CustomButton onPress={() => { this.start() }} title='START'></CustomButton>
         </View>
       )
     }
     else if (this.state.isStarted && !this.state.advice && !this.state.isFinished) {
       return (
         <View style={styles.container}>
-          <Text>{this.state.questions[this.state.questionNo].question}</Text>
-          <Button type='outline' color="black" onPress={() => { this.answer('yes') }} title='yes'></Button>
-          <Button type='outline' color="black" onPress={() => { this.answer('no') }} title='no'></Button>
+          <Text style={styles.questionText}>{this.state.questions[this.state.questionNo].question}</Text>
+          <View style={styles.buttonBar}>
+            <CustomButton onPress={() => { this.answer('yes') }} title='yes'></CustomButton>
+            <CustomButton onPress={() => { this.answer('no') }} title='no'></CustomButton>
+          </View>
 
         </View>
       )
@@ -91,26 +112,49 @@ export default class App extends React.Component {
     else if (this.state.advice && this.state.questionNo != 16) {
       return (
         <View style={styles.container}>
-          <Text>{this.state.questions[this.state.questionNo].advice}</Text>
-            <Button type='outline' color="black" onPress={() => { this.backToQuestions() }} title='Back to questions'></Button> 
+          <Text style={styles.questionText}>{this.state.questions[this.state.questionNo].advice}</Text>
+           <LongButton onPress={() => { this.backToQuestions() }} title='Back to questions'></LongButton>
         </View>
       )
     }
     else if (this.state.isFinished || this.state.questionNo == 16) {
       return (
       <View style={styles.container}>
-          <Text>That is it for today.</Text>
+          <Text style={styles.questionText}>That is it for today.</Text>
         </View>
       )
     }
   }
+
 }
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
+    alignContent: "center",
+    borderLeftWidth: 30,
+    borderRightWidth: 30,
+    borderColor: 'white'
+  },
+  titleText: {
+    fontSize: 30,
+    textAlign: 'center',
+    fontFamily: 'Courier',
+  },
+  questionText: {
+    fontSize: 25,
+    textAlign: 'center',
+    fontFamily: 'Courier'
+
+
+  },
+  buttonBar: {
+    flexDirection: 'row',
+    alignContent: "space-between",
+
   },
 });
