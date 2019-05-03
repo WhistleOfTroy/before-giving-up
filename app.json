@@ -19,6 +19,9 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
+    "android": {
+      "package": "whistle.of.troy"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
