@@ -1,13 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, Switch } from 'react-native';
 import { CustomButton } from './components/customButton.js';
 import { LongButton } from './components/longButton';
+import { AsyncStorage } from 'react-native';
 
 import { Font } from 'expo';
 
 export default class App extends React.Component {
   componentWillMount() {
     this._loadAssetsAsync();
+    this._retrieveData();
   }
 
   _loadAssetsAsync = async () => {
@@ -16,9 +18,30 @@ export default class App extends React.Component {
     });
     this.setState({ loaded: true });
   };
+  _storeData = async () => {
+    try {
+      await AsyncStorage.setItem('darkMode', this.state.darkMode);
+      console.log(this.state.darkMode)
+    } catch (error) {
+      // Error saving data
+    }
+  };
+  _retrieveData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('darkMode');
+      if (value !== null) {
+        // We have data!!
+        console.log(value);
+        this.setState({ darkMode: value })
+      }
+    } catch (error) {
+      // Error retrieving data
+    }
+  };
   constructor(props) {
     super(props);
     this.state = {
+      darkMode: false,
       loaded: false,
       isStarted: false,
       isFinished: false,
@@ -70,6 +93,10 @@ export default class App extends React.Component {
         })
       }
     }
+    this.toggleTheme = (value) => {
+      this.setState({ darkMode: value })
+      this._storeData();
+    }
     this.answer = (answerValue) => {
       if (answerValue == this.state.questions[this.state.questionNo].answer && (this.state.questionNo < 15)) {
         this.setState({
@@ -97,24 +124,41 @@ export default class App extends React.Component {
     }
     if (!this.state.isStarted && this.state.loaded) {
       return (
-        <View style={styles.container}>
-          <Text style={styles.titleText}>Everything is awful and I'm not okay</Text>
-          <Text style={styles.questionText}>Questions to ask before giving up</Text>
-          <CustomButton onPress={() => { this.start() }} title='START'></CustomButton>
+        <View style={this.state.darkMode ? darkStyles.container : styles.container}>
+          <View style={this.state.darkMode ? darkStyles.container : styles.container}>
+            <Text style={this.state.darkMode ? darkStyles.titleText : styles.titleText}>Everything is awful and I'm not okay</Text>
+            <View style={styles.paddingView}></View>
+            <Text style={this.state.darkMode ? darkStyles.questionText : styles.questionText}>Questions to ask before giving up</Text>
+            <View style={styles.paddingView}></View>
+            <CustomButton onPress={() => { this.start() }} title='START' darkMode={this.state.darkMode}></CustomButton>
+          </View>
+          <View style={this.state.darkMode ? darkStyles.themeContainer : styles.themeContainer}>
+            <View style={styles.buttonBar}>
+              <Text style={this.state.darkMode ? darkStyles.themeText : styles.themeText}> Dark theme</Text>
+              <Switch
+              trackColor= {{true: 'grey'}}
+              thumbColor = '#181b21'
+                onValueChange={value => this.setState({ darkMode: value })}
+                value={this.state.darkMode}
+              ></Switch>
+            </View>
+          </View>
         </View>
       )
     }
     else if (this.state.isStarted && !this.state.advice && !this.state.isFinished) {
       return (
-        <View style={styles.container}>
+        <View style={this.state.darkMode ? darkStyles.container : styles.container}>
           <Image
             source={this.state.questions[this.state.questionNo].image}
             style={styles.image}
           />
-          <Text style={styles.questionText}>{this.state.questions[this.state.questionNo].question}</Text>
+          <View style={styles.paddingView}></View>
+          <Text style={this.state.darkMode ? darkStyles.questionText : styles.questionText}>{this.state.questions[this.state.questionNo].question}</Text>
+          <View style={styles.paddingView}></View>
           <View style={styles.buttonBar}>
-            <CustomButton onPress={() => { this.answer('yes') }} title='yes'></CustomButton>
-            <CustomButton onPress={() => { this.answer('no') }} title='no'></CustomButton>
+            <CustomButton darkMode={this.state.darkMode} onPress={() => { this.answer('yes') }} title='yes'></CustomButton>
+            <CustomButton darkMode={this.state.darkMode} onPress={() => { this.answer('no') }} title='no'></CustomButton>
           </View>
 
         </View>
@@ -122,17 +166,19 @@ export default class App extends React.Component {
     }
     else if (this.state.advice && this.state.questionNo != 16) {
       return (
-        <View style={styles.container}>
-          <Text style={styles.questionText}>{this.state.questions[this.state.questionNo].advice}</Text>
-          <LongButton onPress={() => { this.backToQuestions() }} title='Back to questions'></LongButton>
+        <View style={this.state.darkMode ? darkStyles.container : styles.container}>
+          <Text style={this.state.darkMode ? darkStyles.questionText : styles.questionText}>{this.state.questions[this.state.questionNo].advice}</Text>
+          <View style={styles.paddingView}></View>
+          <LongButton darkMode={this.state.darkMode} onPress={() => { this.backToQuestions() }} title='Back to questions'></LongButton>
         </View>
       )
     }
     else if (this.state.isFinished || this.state.questionNo == 16) {
       return (
-        <View style={styles.container}>
-          <Text style={styles.questionText}>That is it for today.</Text>
-          <LongButton onPress={() => this.restart()} title='Restart' />
+        <View style={this.state.darkMode ? darkStyles.container : styles.container}>
+          <Text style={this.state.darkMode ? darkStyles.questionText : styles.questionText}>That is it for today.</Text>
+          <View style={styles.paddingView}></View>
+          <LongButton darkMode={this.state.darkMode} onPress={() => this.restart()} title='Restart' />
         </View>
       )
     }
@@ -143,6 +189,19 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 7,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: "center",
+    borderLeftWidth: 30,
+    borderRightWidth: 30,
+    borderColor: 'white'
+  },
+  paddingView: {
+    height: 30,
+  },
+  themeContainer: {
     flex: 1,
     backgroundColor: 'white',
     alignItems: 'center',
@@ -152,10 +211,16 @@ const styles = StyleSheet.create({
     borderRightWidth: 30,
     borderColor: 'white'
   },
+  themeText: {
+    fontSize: 20,
+    textAlign: 'center',
+    fontFamily: 'Courier'
+  },
   titleText: {
     fontSize: 30,
     textAlign: 'center',
     fontFamily: 'Courier',
+    borderWidth: 2,
   },
   questionText: {
     fontSize: 25,
@@ -169,6 +234,53 @@ const styles = StyleSheet.create({
   buttonBar: {
     flexDirection: 'row',
     alignContent: "space-between",
-
+  },
+});
+const darkStyles = StyleSheet.create({
+  container: {
+    flex: 7,
+    backgroundColor: 'black',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: "center",
+    borderLeftWidth: 30,
+    borderRightWidth: 30,
+    borderColor: 'black'
+  },
+  themeContainer: {
+    flex: 1,
+    backgroundColor: 'black',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: "center",
+    borderLeftWidth: 30,
+    borderRightWidth: 30,
+    borderColor: 'black'
+  },
+  themeText: {
+    fontSize: 20,
+    textAlign: 'center',
+    fontFamily: 'Courier',
+    color: "white",
+  },
+  titleText: {
+    fontSize: 30,
+    textAlign: 'center',
+    fontFamily: 'Courier',
+    color: "white",
+  },
+  questionText: {
+    fontSize: 25,
+    textAlign: 'center',
+    fontFamily: 'Courier',
+    color: "white",
+  },
+  image: {
+    width: 100,
+    height: 100
+  },
+  buttonBar: {
+    flexDirection: 'row',
+    alignContent: "space-between",
   },
 });
