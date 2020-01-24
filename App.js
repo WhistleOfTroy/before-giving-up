@@ -1,13 +1,13 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image, Switch } from 'react-native';
+import { StyleSheet, Text, View, Image, Switch, ImageBackground } from 'react-native';
 import { CustomButton } from './components/customButton.js';
 import { LongButton } from './components/longButton';
 import { AsyncStorage } from 'react-native';
 
-import { Font } from 'expo';
+import * as Font  from 'expo-font';
 
 export default class App extends React.Component {
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this._loadAssetsAsync();
     this._retrieveData();
   }
@@ -77,6 +77,7 @@ export default class App extends React.Component {
         isStarted: false,
         questionNo: 0,
         advice: false,
+        isFinished: false,
       })
     }
     this.backToQuestions = () => {
@@ -125,6 +126,7 @@ export default class App extends React.Component {
     if (!this.state.isStarted && this.state.loaded) {
       return (
         <View style={this.state.darkMode ? darkStyles.container : styles.container}>
+          <ImageBackground source={this.state.darkMode? require('./assets/darkwatercolor.jpg') : require('./assets/watercolor.jpg')} style = {{witdh:'100%', height:'100%'}} imageStyle={{resizeMode: 'stretch'}}>
           <View style={this.state.darkMode ? darkStyles.container : styles.container}>
             <Text style={this.state.darkMode ? darkStyles.titleText : styles.titleText}>Everything is awful and I'm not okay</Text>
             <View style={styles.paddingView}></View>
@@ -143,12 +145,15 @@ export default class App extends React.Component {
               ></Switch>
             </View>
           </View>
+          </ImageBackground>
         </View>
       )
     }
     else if (this.state.isStarted && !this.state.advice && !this.state.isFinished) {
       return (
+        <ImageBackground source={this.state.darkMode? require('./assets/darkwatercolor.jpg') : require('./assets/watercolor.jpg')} style = {{witdh:'100%', height:'100%', justifyContent: 'center', alignItems: 'center', alignContent: 'center'}} imageStyle={{resizeMode: 'stretch'}}>
         <View style={this.state.darkMode ? darkStyles.container : styles.container}>
+          
           <Image
             source={this.state.questions[this.state.questionNo].image}
             style={styles.image}
@@ -160,26 +165,31 @@ export default class App extends React.Component {
             <CustomButton darkMode={this.state.darkMode} onPress={() => { this.answer('yes') }} title='yes'></CustomButton>
             <CustomButton darkMode={this.state.darkMode} onPress={() => { this.answer('no') }} title='no'></CustomButton>
           </View>
-
         </View>
+        </ImageBackground>
+
       )
     }
     else if (this.state.advice && this.state.questionNo != 16) {
       return (
+        <ImageBackground source={this.state.darkMode? require('./assets/darkwatercolor.jpg') : require('./assets/watercolor.jpg')} style = {{witdh:'100%', height:'100%', justifyContent: 'center', alignItems: 'center', alignContent: 'center'}} imageStyle={{resizeMode: 'stretch'}}>
         <View style={this.state.darkMode ? darkStyles.container : styles.container}>
           <Text style={this.state.darkMode ? darkStyles.questionText : styles.questionText}>{this.state.questions[this.state.questionNo].advice}</Text>
           <View style={styles.paddingView}></View>
           <LongButton darkMode={this.state.darkMode} onPress={() => { this.backToQuestions() }} title='Back to questions'></LongButton>
         </View>
+        </ImageBackground>
       )
     }
     else if (this.state.isFinished || this.state.questionNo == 16) {
       return (
+        <ImageBackground source={this.state.darkMode? require('./assets/darkwatercolor.jpg') : require('./assets/watercolor.jpg')} style = {{witdh:'100%', height:'100%', justifyContent: 'center', alignItems: 'center', alignContent: 'center'}} imageStyle={{resizeMode: 'stretch'}}>
         <View style={this.state.darkMode ? darkStyles.container : styles.container}>
           <Text style={this.state.darkMode ? darkStyles.questionText : styles.questionText}>That is it for today.</Text>
           <View style={styles.paddingView}></View>
           <LongButton darkMode={this.state.darkMode} onPress={() => this.restart()} title='Restart' />
         </View>
+        </ImageBackground>
       )
     }
   }
@@ -190,26 +200,21 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 7,
-    backgroundColor: 'white',
+    width:'100%',
     alignItems: 'center',
     justifyContent: 'center',
-    alignContent: "center",
-    borderLeftWidth: 30,
-    borderRightWidth: 30,
-    borderColor: 'white'
+    alignContent: "center"
   },
   paddingView: {
     height: 30,
   },
   themeContainer: {
     flex: 1,
-    backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
     alignContent: "center",
-    borderLeftWidth: 30,
-    borderRightWidth: 30,
-    borderColor: 'white'
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   themeText: {
     fontSize: 20,
@@ -220,7 +225,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     textAlign: 'center',
     fontFamily: 'Courier',
-    borderWidth: 2,
   },
   questionText: {
     fontSize: 25,
@@ -239,23 +243,17 @@ const styles = StyleSheet.create({
 const darkStyles = StyleSheet.create({
   container: {
     flex: 7,
-    backgroundColor: 'black',
     alignItems: 'center',
     justifyContent: 'center',
     alignContent: "center",
-    borderLeftWidth: 30,
-    borderRightWidth: 30,
-    borderColor: 'black'
   },
   themeContainer: {
     flex: 1,
-    backgroundColor: 'black',
     alignItems: 'center',
     justifyContent: 'center',
     alignContent: "center",
-    borderLeftWidth: 30,
-    borderRightWidth: 30,
-    borderColor: 'black'
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   themeText: {
     fontSize: 20,
